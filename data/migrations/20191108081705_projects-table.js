@@ -5,7 +5,7 @@ exports.up = function(knex) {
     .createTable('projects', tbl=> {
         tbl.increments();
         tbl.string('name', 164).notNullable();
-        tbl.string('desription', 255);
+        tbl.string('description', 255);
         tbl.boolean('completed').notNullable().defaultTo(false);
         //multiple tasks
         tbl
