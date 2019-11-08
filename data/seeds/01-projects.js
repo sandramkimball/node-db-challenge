@@ -4,7 +4,7 @@ exports.seed = function(knex, Promise) {
     .then(function () {
       return knex('projects').insert([
         {
-          name: 'Build a website',
+          name: 'Build marketing site website',
           completed: false,
         },
         {

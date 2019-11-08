@@ -1,60 +1,63 @@
-const db = require('../data/db-config.js');
+const express = require('express');
+const db = require('./project-module.js');
+const router = express.Router();
+const Projects = require('./project-module.js');
 
-module.exports = {
-    addResource,
-    getResources,
-    addProject,
-    getProjects,
-    addTask,
-    getTasks,
-    findById,
-};
 
-//RESOURCES
-function getResources(){
-    return db.select('*').from('resources')
-}; 
-
-function addResource (rsrc){
-    return db('resources')
-    .insert(rsrc)
-    .then(ids=> {
-        return db('resources').where({id: ids[0]}).first();
+//GET PROJECTS
+router.get('/', (req, res)=> {
+  Projects.getProjects()
+    .then(projects=> {
+        res.json(projects)
     })
-};
+    .catch (err => {
+        res.status(500).json({ message: 'Failed to get projects' });
+      });
+});
 
-
-//PROJECTS
-function getProjects(){
-    return db.select('*').from('projects')
-};
-
-function addProject(prj){
-    return db('projects')
-    .insert(prj)
-    .then(ids=> {
-        return db('projects').where({id: ids[0]}).first();
+//GET PROJECT ID
+router.get('/:id', (req, res) => {  
+    Projects.findById(req.params.id)
+    .then(project => {
+      if (project) {
+        res.status(200).json(project);
+      } else {
+        res.status(404).json({ message: 'Could not find project.' })
+      }
     })
-};
+    .catch(err => {
+      res.status(500).json({ message: 'Failed to get project' });
+    });
+  });
 
-
-//TASKS
-function getTasks(){
-    return db.select('*').from('tasks')
-};
-
-function addTask(tsk){
-    return db('task')
-    .insert(tsk)
-    .then(ids=> {
-        return db('projects').where({id: ids[0]}).first();
+//GET RESOURCES
+router.get('/:id/resources', (req, res)=> {
+  Projects.getResources()
+    .select('resources.name', 'resources.description')
+    .from('resources')
+    .join('resources', 'projects.id', '=', 'resources.project_id')
+    .then(resources=> {
+        res.status(200).json(resources)
     })
-};
+    .catch (err => {
+        res.status(500).json({ message: 'Failed to get resources' });
+      });
+});
+
+//GET TASKS
+router.get('/:id/tasks', (req, res)=> {
+  Projects.getTasks()
+    .select('tasks.name', 'tasks.description')
+    .from('tasks')
+    .join('projects', 'tasks.project_id', '=', 'project.id')
+    // .join('tasks', 'projects.id', '=', 'tasks.project_id')
+    .then(tasks=> {
+        res.status(200).json(tasks)
+    })
+    .catch (err => {
+        res.status(500).json({ message: 'Failed to get tasks' });
+      });
+});
 
 
-//OTHER
-function findById(id){
-    return db('projects')
-        .where({ id })
-        .first();
-}
+module.exports = router;
