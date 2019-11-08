@@ -48,7 +48,9 @@ function addProject(prj){
 
 //TASKS
 function getTasks(){
-    return db.select('*').from('tasks')
+    return db
+    .select('*')
+    .from('tasks')
 };
 
 function getTaskById(id){

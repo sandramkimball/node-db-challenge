@@ -6,9 +6,10 @@ const Projects = require('./project-module.js');
 
 //GET PROJECTS
 router.get('/', (req, res)=> {
-  Projects.getProjects()
+  Projects
+    .getProjects()
     .then(projects=> {
-        res.json(projects)
+        res.status(200).json(projects)
     })
     .catch (err => {
         res.status(500).json({ message: 'Failed to get projects' });
@@ -33,9 +34,10 @@ router.get('/:id', (req, res) => {
 //GET RESOURCES
 router.get('/:id/resources', (req, res)=> {
   Projects.getResources()
-    .select('resources.name', 'resources.description')
+    .select('*')
     .from('resources')
-    .join('resources', 'projects.id', '=', 'resources.project_id')
+    .where('resources.project_id', '=', `${req.params.id}`)
+    // .join('resources', 'projects.id', '=', 'resources.project_id')
     .then(resources=> {
         res.status(200).json(resources)
     })
@@ -46,17 +48,17 @@ router.get('/:id/resources', (req, res)=> {
 
 //GET TASKS
 router.get('/:id/tasks', (req, res)=> {
-  Projects.getTasks()
-    .select('tasks.name', 'tasks.description')
+  Projects
+    .getTasks()
+    .select('*')
     .from('tasks')
-    .join('projects', 'tasks.project_id', '=', 'project.id')
-    // .join('tasks', 'projects.id', '=', 'tasks.project_id')
+    .where('tasks.project_id', '=', `${req.params.id}`)
     .then(tasks=> {
         res.status(200).json(tasks)
     })
     .catch (err => {
-        res.status(500).json({ message: 'Failed to get tasks' });
-      });
+        res.status(500).json({ message: 'Failed to get tasks', err });
+    });
 });
 
 
